@@ -9,7 +9,7 @@ Scripts to get a DoD CAC working on Linux.
 
 ## Clone this repository 
 ```
-git clone https://github.com/large-farva/sacrilege/ 
+git clone https://github.com/large-farva/sacrilege.git
 ```
 
 ## Make the script for your distro executable and execute.
