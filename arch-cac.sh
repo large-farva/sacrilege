@@ -1,25 +1,20 @@
 #!/bin/bash
 
-# URL of the custom background image to download
 IMAGE_URL="https://i.postimg.cc/fRmJRVdg/Screenshot-from-2024-05-30-13-21-59.png"
 
-# Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to print error message and exit
 error_exit() {
     yad --title="Error" --text="Error: $1" --button="OK:1" --css=/tmp/custom.css
     rm /tmp/custom.css
     exit 1
 }
 
-# Download the custom background image
 IMAGE_PATH="/tmp/custom_background.png"
 wget -O "$IMAGE_PATH" "$IMAGE_URL" || error_exit "Failed to download custom background image"
 
-# Custom CSS for Gruvbox dark palette with background image
 cat <<EOF > /tmp/custom.css
 window {
     background-image: url("$IMAGE_PATH");
@@ -51,7 +46,6 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Main menu
 yad --title="CAC Setup" --text="Welcome to the CAC Setup Tool" --button="Start:0" --button="Exit:1" --css=/tmp/custom.css
 if [ $? -ne 0 ]; then
     rm /tmp/custom.css
@@ -127,9 +121,7 @@ kill $PROGRESS_PID
 
 yad --title="CAC Setup" --text="Installation complete. Please restart your browser and try using your CAC." --button="OK:0" --css=/tmp/custom.css
 
-# Clean up temporary files
 rm /tmp/custom.css
 rm "$IMAGE_PATH"
 
 # End of script
-
