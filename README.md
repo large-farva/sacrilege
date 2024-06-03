@@ -1,6 +1,10 @@
 ## SACRILEGE
 Linux automation scripts
 
+Make sure you read all scripts before running them on your computer.
+
+Shit can hit the fan if you just download and run scripts from the internet all willy nilly.
+
 ### debian-update.sh
 Complete Debian 12 update the "right" way.
 - Removes dpkg lock files.
@@ -36,7 +40,7 @@ chmod +x arch-cac.sh
 ```
 ### Logs
 All sacrilege scripts logs are stored in ~/.logs.
-~/.logs is NOT standard practice, but I like to keep logs for my scripts seperate.
 
-I personally use a special script directory (~/Scripts).
-If you would rather 
+~/.logs is NOT standard practice, but I like to keep logs for my custom scripts seperate.
+
+Change the script to deposit the logs where you want them.
