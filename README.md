@@ -18,7 +18,7 @@ Complete Debian 12 update the "right" way.
 Same as debian-update.sh, but for Arch.
 
 ### arch-cac.sh
-Get a DoD CAC working on any Arch based distro.
+Get your DoD CAC working on any Arch based distro.
 Currently, only Firefox is supported. Chrome is in the works.
 - Installing necessary packages.
 - Installing middleware.
