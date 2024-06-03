@@ -15,7 +15,14 @@ Complete Debian 12 update the "right" way.
 - autoclean
 
 ### arch-update.sh
-Same as debian-update.sh, but for Arch.
+Complete Arch update the "right" way.
+- Removes dpkg lock files.
+- Updates package lists.
+- Updates pacman packages.
+- Updates AUR packages.
+- dist-upgrade
+- autoremove
+- autoclean
 
 ### arch-cac.sh (WORK IN PROGRESS)
 Get your DoD CAC working on any Arch based distro.
