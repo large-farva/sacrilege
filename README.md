@@ -36,6 +36,7 @@ git clone https://github.com/large-farva/sacrilege.git
 ```
 # Example:
 chmod +x arch-cac.sh
+# Execute
 ./arch-cac.sh
 ```
 ### Logs
