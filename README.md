@@ -1,5 +1,21 @@
-# SACRILEGE
-Scripts to get a DoD CAC working on Linux.
+## SACRILEGE
+Linux automation scripts
+
+### debian-update.sh
+Complete Debian 12 update the "right" way.
+- Removes dpkg lock files.
+- Updates package lists.
+- Updates packages.
+- dist-upgrade
+- autoremove
+- autoclean
+
+### arch-update.sh
+Same as debian-update.sh, but for Arch.
+
+### arch-cac.sh
+Get a DoD CAC working on any Arch based distro.
+Currently, only Firefox is supported. Chrome is in the works.
 - Installing necessary packages.
 - Installing middleware.
 - Starting CAC driver service.
@@ -7,15 +23,20 @@ Scripts to get a DoD CAC working on Linux.
 - Installing certificates on your system.
 - Installing certificates to Firefox.
 
-## Clone this repository 
+### Clone this repository 
 ```
 git clone https://github.com/large-farva/sacrilege.git
 ```
 
-## Make the script for your distro executable and execute.
+### Make sure scripts are executable after cloning.
 ```
+# Example:
 chmod +x arch-cac.sh
 ./arch-cac.sh
 ```
+### Logs
+All sacrilege scripts logs are stored in ~/.logs.
+~/.logs is NOT standard practice, but I like to keep logs for my scripts seperate.
 
-### Arch is the only distro I've made a script for, so far. More to come when I feel like it.
+I personally use a special script directory (~/Scripts).
+If you would rather 
