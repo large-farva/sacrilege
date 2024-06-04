@@ -9,7 +9,7 @@ Shit can hit the fan if you just download and run scripts from the internet all 
 Complete Debian 12 update the "right" way.
 - Removes dpkg lock files.
 - Updates package lists.
-- Updates packages.
+- Updates apt packages.
 - dist-upgrade
 - autoremove
 - autoclean
