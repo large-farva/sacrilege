@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#################################
+###########################################
 # Debian 12 Update Script.
 #
 # written by Sebastian Vencill
 #
-# https://github.com/large-farva/
-#################################
+# https://github.com/large-farva/sacrilege/
+###########################################
 
 # Define colors.
 hex_color() {
@@ -83,11 +83,11 @@ print_system_info
 
 echo ""
 
-# Check for internet.
+# Check for internet connectivity
 print_message $YELLOW "Checking for internet connectivity..."
 if ! ping -c 1 8.8.8.8 &> /dev/null; then
     print_message $RED "No internet connection. Exiting."
-    log_and_print $RED "No internet connection. Exiting at $CURRENT_DATE $CURRENT_TIME."
+    log $RED "No internet connection. Exiting at $CURRENT_DATE $CURRENT_TIME."
     exit 1
 else
     print_message $GREEN "Internet connection is available."
@@ -102,11 +102,10 @@ echo ""
 
 # Remove dpkg lock files.
 print_message $YELLOW "Removing dpkg lock files..."
-sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock 2>> $LOG_FILE
-if [ $? -eq 0 ]; then
+if sudo rm -rf /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock 2>> $LOG_FILE; then
     print_message $GREEN "Lock files removed successfully."
 else
-    print_message $RED "Failed to remove lock files."
+    print_message $RED "[/var/lib/dpkg/lock-frontend] [/var/lib/dpkg/lock] Failed to remove lock files or no lock files present."
 fi
 
 echo ""
@@ -115,9 +114,14 @@ echo ""
 print_message $YELLOW "Updating package lists..."
 sudo apt-get update >> $LOG_FILE 2>&1
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Package lists updated successfully."
+    UPGRADEABLE=$(sudo apt list --upgradable 2>/dev/null | grep -v Listing)
+    if [ -n "$UPGRADEABLE" ]; then
+        print_message $GREEN "Package lists updated successfully."
+    else
+        print_message $GREEN "[update] No new updates available."
+    fi
 else
-    print_message $RED "Failed to update package lists."
+    print_message $RED "[update] Failed to update package lists."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
     exit 1
 fi
@@ -129,9 +133,13 @@ print_message $YELLOW "Upgrading packages..."
 UPGRADE_LOG=$(sudo apt-get upgrade -y)
 echo "$UPGRADE_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Packages upgraded successfully."
+    if echo "$UPGRADE_LOG" | grep -q "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."; then
+        print_message $GREEN "[upgrade] All packages are up to date."
+    else
+        print_message $GREEN "Packages upgraded successfully."
+    fi
 else
-    print_message $RED "Failed to upgrade packages."
+    print_message $RED "[upgrade] Failed to upgrade packages."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
     exit 1
 fi
@@ -143,9 +151,13 @@ print_message $YELLOW "Performing dist-upgrade..."
 DIST_UPGRADE_LOG=$(sudo apt-get dist-upgrade -y)
 echo "$DIST_UPGRADE_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Dist-upgrade completed successfully."
+    if echo "$DIST_UPGRADE_LOG" | grep -q "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."; then
+        print_message $GREEN "[dist-upgrade] All packages are up to date."
+    else
+        print_message $GREEN "Dist-upgrade completed successfully."
+    fi
 else
-    print_message $RED "Failed to complete dist-upgrade."
+    print_message $RED "[dist-upgrade] Failed to complete dist-upgrade."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
     exit 1
 fi
@@ -157,9 +169,13 @@ print_message $YELLOW "Removing unnecessary packages..."
 AUTOREMOVE_LOG=$(sudo apt-get autoremove -y)
 echo "$AUTOREMOVE_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Unnecessary packages removed successfully."
+    if echo "$AUTOREMOVE_LOG" | grep -q "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."; then
+        print_message $GREEN "[autoremove] Nothing to remove."
+    else
+        print_message $GREEN "Unnecessary packages removed successfully."
+    fi
 else
-    print_message $RED "Failed to remove unnecessary packages."
+    print_message $RED "[autoremove] Failed to remove unnecessary packages."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
     exit 1
 fi
@@ -171,16 +187,20 @@ print_message $YELLOW "Cleaning up..."
 AUTOCLEAN_LOG=$(sudo apt-get autoclean -y)
 echo "$AUTOCLEAN_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Cleanup completed successfully."
+    if grep -q "Del" <<< "$AUTOCLEAN_LOG"; then
+        print_message $GREEN "Cleanup completed successfully."
+    else
+        print_message $GREEN "[autoclean] Nothing to clean."
+    fi
 else
-    print_message $RED "Failed to clean up."
+    print_message $RED "[autoclean] Failed to clean up."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
     exit 1
 fi
 
 echo ""
 
-# Summary
+# Summarize package changes
 print_message $CYAN "SUMMARY"
 print_message $CYAN "===================="
 INSTALLED_PACKAGES=$(echo "$UPGRADE_LOG" "$DIST_UPGRADE_LOG" | grep -E '^(Inst)' | wc -l)
@@ -209,5 +229,3 @@ print_message $WHITE "Press Enter to exit."
 read -r
 
 exit 0
-
-# THE END
