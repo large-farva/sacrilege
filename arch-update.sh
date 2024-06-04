@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#################################
+###########################################
 # Arch Update Script.
 #
 # written by Sebastian Vencill
 #
-# https://github.com/large-farva/
-#################################
+# https://github.com/large-farva/sacrilege/
+###########################################
 
 # Define colors.
 hex_color() {
@@ -102,8 +102,7 @@ echo ""
 
 # Remove pacman lock files.
 print_message $YELLOW "Removing pacman lock files..."
-sudo rm -rf /var/lib/pacman/db.lck 2>> $LOG_FILE
-if [ $? -eq 0 ]; then
+if sudo rm -rf /var/lib/pacman/db.lck 2>> $LOG_FILE; then
     print_message $GREEN "Lock files removed successfully."
 else
     print_message $RED "Failed to remove lock files."
@@ -116,7 +115,11 @@ print_message $YELLOW "Updating package lists and upgrading packages..."
 UPGRADE_LOG=$(sudo pacman -Syu --noconfirm)
 echo "$UPGRADE_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Packages updated and upgraded successfully."
+    if echo "$UPGRADE_LOG" | grep -q "there is nothing to do"; then
+        print_message $GREEN "No packages to upgrade."
+    else
+        print_message $GREEN "Packages updated and upgraded successfully."
+    fi
 else
     print_message $RED "Failed to update and upgrade packages."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
@@ -131,7 +134,11 @@ if command -v yay &> /dev/null; then
     AUR_UPGRADE_LOG=$(yay -Syu --noconfirm)
     echo "$AUR_UPGRADE_LOG" >> $LOG_FILE
     if [ $? -eq 0 ]; then
-        print_message $GREEN "AUR packages updated successfully."
+        if echo "$AUR_UPGRADE_LOG" | grep -q "there is nothing to do"; then
+            print_message $GREEN "No AUR packages to upgrade."
+        else
+            print_message $GREEN "AUR packages updated successfully."
+        fi
     else
         print_message $RED "Failed to update AUR packages."
         log_and_print $RED "AUR update process failed on $CURRENT_DATE at $CURRENT_TIME"
@@ -143,10 +150,14 @@ echo ""
 
 # Autoremove
 print_message $YELLOW "Removing unnecessary packages..."
-AUTOREMOVE_LOG=$(sudo pacman -Rns $(pacman -Qdtq) --noconfirm)
+AUTOREMOVE_LOG=$(sudo pacman -Rns $(pacman -Qdtq) --noconfirm 2>&1)
 echo "$AUTOREMOVE_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Unnecessary packages removed successfully."
+    if [ -z "$AUTOREMOVE_LOG" ]; then
+        print_message $GREEN "No unnecessary packages to remove."
+    else
+        print_message $GREEN "Unnecessary packages removed successfully."
+    fi
 else
     print_message $RED "Failed to remove unnecessary packages."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
@@ -157,10 +168,14 @@ echo ""
 
 # Clean package cache
 print_message $YELLOW "Cleaning up package cache..."
-AUTOCLEAN_LOG=$(sudo pacman -Sc --noconfirm)
+AUTOCLEAN_LOG=$(sudo pacman -Sc --noconfirm 2>&1)
 echo "$AUTOCLEAN_LOG" >> $LOG_FILE
 if [ $? -eq 0 ]; then
-    print_message $GREEN "Package cache cleaned successfully."
+    if echo "$AUTOCLEAN_LOG" | grep -q "Cache directory (.*) cleaned"; then
+        print_message $GREEN "Package cache cleaned successfully."
+    else
+        print_message $GREEN "Nothing to clean."
+    fi
 else
     print_message $RED "Failed to clean package cache."
     log_and_print $RED "Update process failed on $CURRENT_DATE at $CURRENT_TIME"
@@ -169,7 +184,7 @@ fi
 
 echo ""
 
-# Summary
+# Summarize package changes
 print_message $CYAN "SUMMARY"
 print_message $CYAN "===================="
 INSTALLED_PACKAGES=$(echo "$UPGRADE_LOG" | grep -E 'installed' | wc -l)
@@ -194,5 +209,3 @@ print_message $WHITE "Press Enter to exit."
 read -r
 
 exit 0
-
-# THE END
